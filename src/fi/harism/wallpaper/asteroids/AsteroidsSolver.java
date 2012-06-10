@@ -27,7 +27,6 @@ import android.os.SystemClock;
 public final class AsteroidsSolver {
 
 	private Vector<AsteroidsParticle> mParticles;
-	private final Vector<Integer> mParticlesRand = new Vector<Integer>();
 	private long mTimeLast;
 	private final RectF mViewRect = new RectF(-1, 1, 1, -1);
 
@@ -43,37 +42,31 @@ public final class AsteroidsSolver {
 		float time = (timeCurrent - mTimeLast) / 1000f;
 		mTimeLast = timeCurrent;
 
-		// Generate random indices order.
-		for (int i = 0; i < mParticlesRand.size(); ++i) {
-			int idx = (int) (Math.random() * mParticlesRand.size());
-			mParticlesRand.add(mParticlesRand.remove(idx));
-		}
-
 		// Calculate force field changes.
 		for (int i = 0; i < mParticles.size(); ++i) {
-			AsteroidsParticle p0 = mParticles.get(mParticlesRand.get(i));
+			AsteroidsParticle p0 = mParticles.get(i);
 			if (!p0.mEnabled)
 				continue;
 
-			for (int j = i + 1; j < mParticles.size(); ++j) {
-				AsteroidsParticle p1 = mParticles.get(mParticlesRand.get(j));
-				if (!p1.mEnabled)
+			for (int j = 0; j < mParticles.size(); ++j) {
+				AsteroidsParticle p1 = mParticles.get(j);
+				if (i == j || !p1.mEnabled)
 					continue;
 
 				float dx = p1.mPosition[0] - p0.mPosition[0];
 				float dy = p1.mPosition[1] - p0.mPosition[1];
 				float dist = (float) Math.sqrt(dx * dx + dy * dy);
 
-				if (dist < .8f) {
-					float fx = (1f - dx / .8f) * time * .2f;
-					float fy = (1f - dy / .8f) * time * .2f;
+				final float DIST_FORCE = .4f;
+				if (dist < DIST_FORCE) {
+					float fx = (1f - dx / DIST_FORCE) * time * .3f;
+					float fy = (1f - dy / DIST_FORCE) * time * .3f;
 
 					p0.mVelocity[0] += fx;
 					p0.mVelocity[1] += fy;
 					p1.mVelocity[0] -= fx;
-					p1.mVelocity[1] -= fx;
+					p1.mVelocity[1] -= fy;
 				}
-
 			}
 		}
 
@@ -83,17 +76,19 @@ public final class AsteroidsSolver {
 			if (!p.mEnabled)
 				continue;
 
-			if (Math.abs(p.mPosition[0] - mViewRect.left) < .2f) {
-				p.mVelocity[0] += .5f * time;
-			}
-			if (Math.abs(p.mPosition[0] - mViewRect.right) < .2f) {
-				p.mVelocity[0] -= .5f * time;
-			}
-			if (Math.abs(p.mPosition[1] - mViewRect.top) < .2f) {
-				p.mVelocity[1] -= .5f * time;
-			}
-			if (Math.abs(p.mPosition[1] - mViewRect.bottom) < .2f) {
-				p.mVelocity[1] += .5f * time;
+			final float DIST_AVOID = .2f;
+			float distLeft = Math.abs(p.mPosition[0] - mViewRect.left);
+			float distRight = Math.abs(p.mPosition[0] - mViewRect.right);
+			float distTop = Math.abs(p.mPosition[1] - mViewRect.top);
+			float distBottom = Math.abs(p.mPosition[1] - mViewRect.bottom);
+			if (distLeft < DIST_AVOID)
+				p.mVelocity[0] += (1f - distLeft / DIST_AVOID) * time;
+			if (distRight < DIST_AVOID)
+				p.mVelocity[0] -= (1f - distRight / DIST_AVOID) * time;
+			if (distTop < DIST_AVOID)
+				p.mVelocity[1] -= (1f - distTop / DIST_AVOID) * time;
+			if (distBottom < DIST_AVOID) {
+				p.mVelocity[1] += (1f - distBottom / DIST_AVOID) * time;
 			}
 		}
 
@@ -107,35 +102,35 @@ public final class AsteroidsSolver {
 
 			if (p.mPosition[0] < mViewRect.left) {
 				p.mPosition[0] = mViewRect.left;
-				p.mVelocity[0] = -p.mVelocity[0] * .8f;
+				p.mVelocity[0] = -p.mVelocity[0] * .5f;
 				p.mCollisionTime = timeCurrent;
 			}
 			if (p.mPosition[0] > mViewRect.right) {
 				p.mPosition[0] = mViewRect.right;
-				p.mVelocity[0] = -p.mVelocity[0] * .8f;
+				p.mVelocity[0] = -p.mVelocity[0] * .5f;
 				p.mCollisionTime = timeCurrent;
 			}
 			if (p.mPosition[1] > mViewRect.top) {
 				p.mPosition[1] = mViewRect.top;
-				p.mVelocity[1] = -p.mVelocity[1] * .8f;
+				p.mVelocity[1] = -p.mVelocity[1] * .5f;
 				p.mCollisionTime = timeCurrent;
 			}
 			if (p.mPosition[1] < mViewRect.bottom) {
 				p.mPosition[1] = mViewRect.bottom;
-				p.mVelocity[1] = -p.mVelocity[1] * .8f;
+				p.mVelocity[1] = -p.mVelocity[1] * .5f;
 				p.mCollisionTime = timeCurrent;
 			}
 		}
 
 		// Finally apply collision detection.
 		for (int i = 0; i < mParticles.size(); ++i) {
-			AsteroidsParticle p0 = mParticles.get(mParticlesRand.get(i));
+			AsteroidsParticle p0 = mParticles.get(i);
 			if (!p0.mEnabled)
 				continue;
 
 			for (int j = i + 1; j < mParticles.size(); ++j) {
-				AsteroidsParticle p1 = mParticles.get(mParticlesRand.get(j));
-				if (!p1.mEnabled)
+				AsteroidsParticle p1 = mParticles.get(j);
+				if (i == j || !p1.mEnabled)
 					continue;
 
 				if (collide(p0, p1)) {
@@ -154,11 +149,11 @@ public final class AsteroidsSolver {
 					float vx2 = -nx * x2;
 					float vy2 = -ny * x2;
 
-					p0.mVelocity[0] = .8f * vx2 + p0.mVelocity[0] - vx1;
-					p0.mVelocity[1] = .8f * vy2 + p0.mVelocity[1] - vy1;
+					p0.mVelocity[0] = vx2 + p0.mVelocity[0] - vx1;
+					p0.mVelocity[1] = vy2 + p0.mVelocity[1] - vy1;
 
-					p1.mVelocity[0] = .8f * vx1 + p1.mVelocity[0] - vx2;
-					p1.mVelocity[1] = .8f * vy1 + p1.mVelocity[1] - vy2;
+					p1.mVelocity[0] = vx1 + p1.mVelocity[0] - vx2;
+					p1.mVelocity[1] = vy1 + p1.mVelocity[1] - vy2;
 
 					float dt = (p0.mRadius + p1.mRadius + .0001f) / dist;
 					p1.mPosition[0] = p0.mPosition[0] - dx * dt;
@@ -190,10 +185,7 @@ public final class AsteroidsSolver {
 
 		mTimeLast = -1;
 
-		mParticlesRand.clear();
 		for (int i = 0; i < mParticles.size(); ++i) {
-			mParticlesRand.add(i);
-
 			AsteroidsParticle p = mParticles.get(i);
 			p.mPosition[0] = rand(mViewRect.left, mViewRect.right);
 			p.mPosition[1] = rand(mViewRect.bottom, mViewRect.top);

@@ -42,12 +42,12 @@ import android.widget.Toast;
 public final class AsteroidsRenderer implements GLSurfaceView.Renderer {
 
 	private static final float[] COLOR_BG = { .2f, .2f, .2f };
-	private static final float[] COLOR_BORDER = { .7f, .3f, .2f };
-	private static final float[] COLOR_BULLET = { .6f, .6f, .6f };
-	private static final float[] COLOR_ENERGY1 = { .3f, .7f, .2f };
-	private static final float[] COLOR_ENERGY2 = { .7f, .3f, .2f };
+	private static final float[] COLOR_BORDER = { .8f, .3f, .2f };
+	private static final float[] COLOR_BULLET = { .7f, .7f, .7f };
+	private static final float[] COLOR_ENERGY1 = { .3f, .8f, .2f };
+	private static final float[] COLOR_ENERGY2 = { .8f, .3f, .2f };
 	private static final float[] COLOR_EXPLODE = { .7f, .6f, .1f };
-	private static final float[] COLOR_SHIP = { .2f, .3f, .7f };
+	private static final float[] COLOR_SHIP = { .2f, .4f, .9f };
 
 	private static final int NUM_BULLETS = 40;
 	private static final int NUM_SHIPS = 40;
@@ -165,11 +165,18 @@ public final class AsteroidsRenderer implements GLSurfaceView.Renderer {
 			float t = (timeScale - 7000) / 3000f;
 			scale = 1f + t * t * (3 - 2 * t);
 		}
+
+		// Calculate line width.
+		float lineWidth = Math.max(1f, Math.min(mWidth, mHeight) * 0.008f);
+		GLES20.glLineWidth(lineWidth * scale);
+
 		// Set up view matrix.
 		mMatrixView.setScale(mAspectRatio[0], mAspectRatio[1]);
 		mMatrixView.postScale(scale, scale);
+
 		// Animate ships.
 		mSolver.animate();
+
 		// Handle bullet movement.
 		for (Bullet b : mArrBullets) {
 			// How long bullet lives after shot.
@@ -197,6 +204,7 @@ public final class AsteroidsRenderer implements GLSurfaceView.Renderer {
 				b.mPosEnd[1] = p.mPosition[1] + ny;
 				b.mShootTime = time;
 			}
+
 			// Move bullet.
 			float t = (time - b.mShootTime) / 700f;
 			AsteroidsParticle p = b.mParticle;
@@ -205,6 +213,7 @@ public final class AsteroidsRenderer implements GLSurfaceView.Renderer {
 			p.mPosition[1] = b.mPosStart[1] + (b.mPosEnd[1] - b.mPosStart[1])
 					* t;
 		}
+
 		// Check bullet collisions against all ships.
 		for (Ship s : mArrShips) {
 			// Skip disabled ships / particles.
@@ -220,6 +229,7 @@ public final class AsteroidsRenderer implements GLSurfaceView.Renderer {
 			}
 
 		}
+
 		// Iterate over ships to see if there are collisions, explosions and
 		// after certain amount of time restore ship back to enabled.
 		for (Ship ship : mArrShips) {
@@ -244,6 +254,7 @@ public final class AsteroidsRenderer implements GLSurfaceView.Renderer {
 				ship.mVisible = true;
 			}
 		}
+
 		// Rendering calls.
 		renderBullets(mShaderCircle);
 		renderShipBorders(mShaderCircle, time);
@@ -256,13 +267,18 @@ public final class AsteroidsRenderer implements GLSurfaceView.Renderer {
 	public void onSurfaceChanged(GL10 unused, int width, int height) {
 		mWidth = width;
 		mHeight = height;
+		
+		GLES20.glViewport(0, 0, mWidth, mHeight);
+
 		// Initialize solver with particles and view rectangle.
 		float dx = (float) Math.max(mWidth, mHeight) / mHeight;
 		float dy = (float) Math.max(mWidth, mHeight) / mWidth;
 		mSolver.init(mArrParticles, new RectF(-dx, dy, dx, -dy));
+
 		// Store view aspect ratio.
 		mAspectRatio[0] = 1f / dx;
 		mAspectRatio[1] = 1f / dy;
+
 		// Initialize ships to initial state.
 		for (Ship ship : mArrShips) {
 			ship.mEnergy = 1f;
@@ -471,8 +487,6 @@ public final class AsteroidsRenderer implements GLSurfaceView.Renderer {
 		int uColor = shader.getHandle("uColor");
 		int aPosition = shader.getHandle("aPosition");
 
-		float lineWidth = Math.max(1f, Math.min(mWidth, mHeight) * 0.008f);
-		GLES20.glLineWidth(lineWidth);
 		GLES20.glUniform3fv(uColor, 1, COLOR_SHIP, 0);
 
 		GLES20.glVertexAttribPointer(aPosition, 2, GLES20.GL_FLOAT, false, 0,
