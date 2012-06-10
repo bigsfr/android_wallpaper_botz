@@ -16,10 +16,18 @@
 
 package fi.harism.wallpaper.asteroids;
 
-public class AsteroidsParticle {
+/**
+ * Common particle data container class.
+ */
+public final class AsteroidsParticle {
+	// Collision time used to indicate about possible collisions.
 	public long mCollisionTime;
+	// If false, this particle does not have effect in collision detection.
 	public boolean mEnabled;
+	// Particle position.
 	public final float[] mPosition = new float[2];
+	// Particle radius used for collision detection.
 	public float mRadius;
+	// Particle velocity.
 	public final float[] mVelocity = new float[2];
 }
