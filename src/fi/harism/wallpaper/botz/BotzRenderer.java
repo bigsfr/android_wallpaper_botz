@@ -267,7 +267,7 @@ public final class BotzRenderer implements GLSurfaceView.Renderer {
 	public void onSurfaceChanged(GL10 unused, int width, int height) {
 		mWidth = width;
 		mHeight = height;
-		
+
 		GLES20.glViewport(0, 0, mWidth, mHeight);
 
 		// Initialize solver with particles and view rectangle.
