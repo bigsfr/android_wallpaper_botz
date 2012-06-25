@@ -2,11 +2,11 @@
 <resources>
 
     <!-- General strings -->
-    <string name="app_name">Asteroids</string>
+    <string name="app_name">Botz</string>
     <string name="author">harism</string>
-    <string name="description">Asteroids, live OpenGL 2.0 ES wallpaper.</string>
+    <string name="description">Botz, live OpenGL 2.0 ES wallpaper.</string>
 
     <!-- Error strings -->
-    <string name="error_shader_compiler">Asteroids error; GLSL shader compiler not supported.</string>
+    <string name="error_shader_compiler">Botz error; GLSL shader compiler not supported.</string>
 
 </resources>

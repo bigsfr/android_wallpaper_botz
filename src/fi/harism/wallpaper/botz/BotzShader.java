@@ -14,7 +14,7 @@
    limitations under the License.
  */
 
-package fi.harism.wallpaper.asteroids;
+package fi.harism.wallpaper.botz;
 
 import java.util.HashMap;
 
@@ -24,7 +24,7 @@ import android.util.Log;
 /**
  * Helper class for handling shaders.
  */
-public final class AsteroidsShader {
+public final class BotzShader {
 
 	// Shader program handles.
 	private int mIdProgram = 0;

@@ -14,7 +14,7 @@
    limitations under the License.
  */
 
-package fi.harism.wallpaper.asteroids;
+package fi.harism.wallpaper.botz;
 
 import java.util.Vector;
 
@@ -24,9 +24,9 @@ import android.os.SystemClock;
 /**
  * Particle solver class.
  */
-public final class AsteroidsSolver {
+public final class BotzSolver {
 
-	private Vector<AsteroidsParticle> mParticles;
+	private Vector<BotzParticle> mParticles;
 	private long mTimeLast;
 	private final RectF mViewRect = new RectF(-1, 1, 1, -1);
 
@@ -44,12 +44,12 @@ public final class AsteroidsSolver {
 
 		// Calculate force field changes.
 		for (int i = 0; i < mParticles.size(); ++i) {
-			AsteroidsParticle p0 = mParticles.get(i);
+			BotzParticle p0 = mParticles.get(i);
 			if (!p0.mEnabled)
 				continue;
 
 			for (int j = 0; j < mParticles.size(); ++j) {
-				AsteroidsParticle p1 = mParticles.get(j);
+				BotzParticle p1 = mParticles.get(j);
 				if (i == j || !p1.mEnabled)
 					continue;
 
@@ -72,7 +72,7 @@ public final class AsteroidsSolver {
 
 		// Avoid collisions with walls.
 		for (int i = 0; i < mParticles.size(); ++i) {
-			AsteroidsParticle p = mParticles.get(i);
+			BotzParticle p = mParticles.get(i);
 			if (!p.mEnabled)
 				continue;
 
@@ -93,7 +93,7 @@ public final class AsteroidsSolver {
 		}
 
 		// Move particles and do bounds check.
-		for (AsteroidsParticle p : mParticles) {
+		for (BotzParticle p : mParticles) {
 			if (!p.mEnabled)
 				continue;
 
@@ -124,12 +124,12 @@ public final class AsteroidsSolver {
 
 		// Finally apply collision detection.
 		for (int i = 0; i < mParticles.size(); ++i) {
-			AsteroidsParticle p0 = mParticles.get(i);
+			BotzParticle p0 = mParticles.get(i);
 			if (!p0.mEnabled)
 				continue;
 
 			for (int j = i + 1; j < mParticles.size(); ++j) {
-				AsteroidsParticle p1 = mParticles.get(j);
+				BotzParticle p1 = mParticles.get(j);
 				if (i == j || !p1.mEnabled)
 					continue;
 
@@ -169,7 +169,7 @@ public final class AsteroidsSolver {
 	/**
 	 * Returns true if two particles collide.
 	 */
-	public boolean collide(AsteroidsParticle p0, AsteroidsParticle p1) {
+	public boolean collide(BotzParticle p0, BotzParticle p1) {
 		float dx = p1.mPosition[0] - p0.mPosition[0];
 		float dy = p1.mPosition[1] - p0.mPosition[1];
 		float r = p0.mRadius + p1.mRadius;
@@ -179,14 +179,14 @@ public final class AsteroidsSolver {
 	/**
 	 * Initialize method.
 	 */
-	public void init(Vector<AsteroidsParticle> particles, RectF viewRect) {
+	public void init(Vector<BotzParticle> particles, RectF viewRect) {
 		mParticles = particles;
 		mViewRect.set(viewRect);
 
 		mTimeLast = -1;
 
 		for (int i = 0; i < mParticles.size(); ++i) {
-			AsteroidsParticle p = mParticles.get(i);
+			BotzParticle p = mParticles.get(i);
 			p.mPosition[0] = rand(mViewRect.left, mViewRect.right);
 			p.mPosition[1] = rand(mViewRect.bottom, mViewRect.top);
 			p.mVelocity[0] = rand(-.5f, .5f);

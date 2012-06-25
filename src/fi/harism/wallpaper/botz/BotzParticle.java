@@ -14,12 +14,12 @@
    limitations under the License.
  */
 
-package fi.harism.wallpaper.asteroids;
+package fi.harism.wallpaper.botz;
 
 /**
  * Common particle data container class.
  */
-public final class AsteroidsParticle {
+public final class BotzParticle {
 	// Collision time used to indicate about possible collisions.
 	public long mCollisionTime;
 	// If false, this particle does not have effect in collision detection.

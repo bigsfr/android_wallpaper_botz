@@ -14,7 +14,7 @@
    limitations under the License.
  */
 
-package fi.harism.wallpaper.asteroids;
+package fi.harism.wallpaper.botz;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -39,7 +39,7 @@ import android.widget.Toast;
 /**
  * Renderer class.
  */
-public final class AsteroidsRenderer implements GLSurfaceView.Renderer {
+public final class BotzRenderer implements GLSurfaceView.Renderer {
 
 	private static final float[] COLOR_BG = { .2f, .2f, .2f };
 	private static final float[] COLOR_BORDER = { .8f, .3f, .2f };
@@ -50,12 +50,12 @@ public final class AsteroidsRenderer implements GLSurfaceView.Renderer {
 	private static final float[] COLOR_SHIP = { .2f, .4f, .9f };
 
 	private static final int NUM_BULLETS = 40;
-	private static final int NUM_SHIPS = 40;
+	private static final int NUM_SHIPS = 30;
 	private static final float RADIUS_BULLET = .01f;
 	private static final float RADIUS_SHIP = .1f;
 
 	private final Vector<Bullet> mArrBullets = new Vector<Bullet>();
-	private final Vector<AsteroidsParticle> mArrParticles = new Vector<AsteroidsParticle>();
+	private final Vector<BotzParticle> mArrParticles = new Vector<BotzParticle>();
 	private final Vector<Ship> mArrShips = new Vector<Ship>();
 	private final float[] mAspectRatio = new float[2];
 	private ByteBuffer mBufferQuad;
@@ -65,17 +65,17 @@ public final class AsteroidsRenderer implements GLSurfaceView.Renderer {
 	private final Matrix mMatrixModel = new Matrix();
 	private final Matrix mMatrixModelView = new Matrix();
 	private final Matrix mMatrixView = new Matrix();
-	private final AsteroidsShader mShaderCircle = new AsteroidsShader();
+	private final BotzShader mShaderCircle = new BotzShader();
 	private final boolean[] mShaderCompilerSupport = new boolean[1];
-	private final AsteroidsShader mShaderEnergy = new AsteroidsShader();
-	private final AsteroidsShader mShaderLine = new AsteroidsShader();
-	private final AsteroidsSolver mSolver = new AsteroidsSolver();
+	private final BotzShader mShaderEnergy = new BotzShader();
+	private final BotzShader mShaderLine = new BotzShader();
+	private final BotzSolver mSolver = new BotzSolver();
 	private int mWidth, mHeight;
 
 	/**
 	 * Default constructor.
 	 */
-	public AsteroidsRenderer(Context context) {
+	public BotzRenderer(Context context) {
 		mContext = context;
 
 		// Full view quad buffer.
@@ -91,7 +91,7 @@ public final class AsteroidsRenderer implements GLSurfaceView.Renderer {
 
 		// Particle and ship instance generation.
 		for (int i = 0; i < NUM_SHIPS; ++i) {
-			AsteroidsParticle p = new AsteroidsParticle();
+			BotzParticle p = new BotzParticle();
 			p.mRadius = RADIUS_SHIP;
 			mArrParticles.add(p);
 
@@ -113,7 +113,7 @@ public final class AsteroidsRenderer implements GLSurfaceView.Renderer {
 		dx /= t;
 		dy /= t;
 
-		for (AsteroidsParticle p : mArrParticles) {
+		for (BotzParticle p : mArrParticles) {
 			p.mVelocity[0] += dx;
 			p.mVelocity[1] += dy;
 		}
@@ -184,7 +184,7 @@ public final class AsteroidsRenderer implements GLSurfaceView.Renderer {
 			// If lifetime exceeded generate new shot.
 			if (time - b.mShootTime > BULLET_LIVE_TIME) {
 				// Find random enabled ship particle.
-				AsteroidsParticle p = mArrParticles
+				BotzParticle p = mArrParticles
 						.get((int) (Math.random() * mArrParticles.size()));
 				while (!p.mEnabled) {
 					p = mArrParticles.get((int) (Math.random() * mArrParticles
@@ -207,7 +207,7 @@ public final class AsteroidsRenderer implements GLSurfaceView.Renderer {
 
 			// Move bullet.
 			float t = (time - b.mShootTime) / 700f;
-			AsteroidsParticle p = b.mParticle;
+			BotzParticle p = b.mParticle;
 			p.mPosition[0] = b.mPosStart[0] + (b.mPosEnd[0] - b.mPosStart[0])
 					* t;
 			p.mPosition[1] = b.mPosStart[1] + (b.mPosEnd[1] - b.mPosStart[1])
@@ -320,7 +320,7 @@ public final class AsteroidsRenderer implements GLSurfaceView.Renderer {
 	/**
 	 * Renders bullets on current FBO.
 	 */
-	private void renderBullets(AsteroidsShader shader) {
+	private void renderBullets(BotzShader shader) {
 		shader.useProgram();
 		int uModelViewM = shader.getHandle("uModelViewM");
 		int uColor = shader.getHandle("uColor");
@@ -336,7 +336,7 @@ public final class AsteroidsRenderer implements GLSurfaceView.Renderer {
 
 		for (Bullet b : mArrBullets) {
 
-			AsteroidsParticle p = b.mParticle;
+			BotzParticle p = b.mParticle;
 			mMatrixModel.setScale(RADIUS_BULLET, RADIUS_BULLET);
 			mMatrixModel.postTranslate(p.mPosition[0], p.mPosition[1]);
 			mMatrixModelView.set(mMatrixModel);
@@ -350,7 +350,7 @@ public final class AsteroidsRenderer implements GLSurfaceView.Renderer {
 	/**
 	 * Renders ship borders into current FBO.
 	 */
-	private void renderShipBorders(AsteroidsShader shader, long time) {
+	private void renderShipBorders(BotzShader shader, long time) {
 		shader.useProgram();
 		int uModelViewM = shader.getHandle("uModelViewM");
 		int uColor = shader.getHandle("uColor");
@@ -368,7 +368,7 @@ public final class AsteroidsRenderer implements GLSurfaceView.Renderer {
 		for (Ship ship : mArrShips) {
 			if (!ship.mVisible)
 				continue;
-			AsteroidsParticle p = ship.mParticle;
+			BotzParticle p = ship.mParticle;
 			// Borders show for certain amount of time only.
 			float ct = (time - p.mCollisionTime) / 200f;
 			if (ct < 1f) {
@@ -393,7 +393,7 @@ public final class AsteroidsRenderer implements GLSurfaceView.Renderer {
 	/**
 	 * Renders ship energy indicators.
 	 */
-	private void renderShipEnergies(AsteroidsShader shader, long time) {
+	private void renderShipEnergies(BotzShader shader, long time) {
 		shader.useProgram();
 		int uModelViewM = shader.getHandle("uModelViewM");
 		int uColor1 = shader.getHandle("uColor1");
@@ -410,7 +410,7 @@ public final class AsteroidsRenderer implements GLSurfaceView.Renderer {
 		for (Ship ship : mArrShips) {
 			if (!ship.mVisible)
 				continue;
-			AsteroidsParticle p = ship.mParticle;
+			BotzParticle p = ship.mParticle;
 			// Energy shows only for certain amount of time.
 			float ct = (time - p.mCollisionTime) / 400f;
 			if (ct < 1f) {
@@ -441,7 +441,7 @@ public final class AsteroidsRenderer implements GLSurfaceView.Renderer {
 	/**
 	 * Renders ship explosions into current FBO.
 	 */
-	private void renderShipExplosions(AsteroidsShader shader, long time) {
+	private void renderShipExplosions(BotzShader shader, long time) {
 		shader.useProgram();
 		int uModelViewM = shader.getHandle("uModelViewM");
 		int uColor = shader.getHandle("uColor");
@@ -457,7 +457,7 @@ public final class AsteroidsRenderer implements GLSurfaceView.Renderer {
 		for (Ship ship : mArrShips) {
 			if (!ship.mVisible || !ship.mExplode)
 				continue;
-			AsteroidsParticle p = ship.mParticle;
+			BotzParticle p = ship.mParticle;
 			// Explosion lasts only for certain amount of time.
 			float ct = (time - ship.mExplodeTime) / 800f;
 			if (ct < 1f) {
@@ -481,7 +481,7 @@ public final class AsteroidsRenderer implements GLSurfaceView.Renderer {
 	/**
 	 * Renders actual ship into current FBO.
 	 */
-	private void renderShipLines(AsteroidsShader shader) {
+	private void renderShipLines(BotzShader shader) {
 		shader.useProgram();
 		int uModelViewM = shader.getHandle("uModelViewM");
 		int uColor = shader.getHandle("uColor");
@@ -496,7 +496,7 @@ public final class AsteroidsRenderer implements GLSurfaceView.Renderer {
 		for (Ship ship : mArrShips) {
 			if (!ship.mVisible)
 				continue;
-			AsteroidsParticle p = ship.mParticle;
+			BotzParticle p = ship.mParticle;
 
 			double tan = Math.atan2(-p.mVelocity[0], p.mVelocity[1]);
 			mMatrixModel.setScale(RADIUS_SHIP, RADIUS_SHIP);
@@ -527,7 +527,7 @@ public final class AsteroidsRenderer implements GLSurfaceView.Renderer {
 	 * Private bullet info holder class.
 	 */
 	private final class Bullet {
-		public final AsteroidsParticle mParticle = new AsteroidsParticle();
+		public final BotzParticle mParticle = new BotzParticle();
 		public final float[] mPosEnd = new float[2];
 		public final float[] mPosStart = new float[2];
 		public long mShootTime;
@@ -540,10 +540,10 @@ public final class AsteroidsRenderer implements GLSurfaceView.Renderer {
 		public float mEnergy;
 		public boolean mExplode;
 		public long mExplodeTime;
-		public AsteroidsParticle mParticle;
+		public BotzParticle mParticle;
 		public boolean mVisible;
 
-		public Ship(AsteroidsParticle particle) {
+		public Ship(BotzParticle particle) {
 			mParticle = particle;
 		}
 	}

@@ -14,14 +14,14 @@
    limitations under the License.
  */
 
-package fi.harism.wallpaper.asteroids;
+package fi.harism.wallpaper.botz;
 
 import android.opengl.GLSurfaceView;
 import android.service.wallpaper.WallpaperService;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 
-public final class AsteroidsService extends WallpaperService {
+public final class BotzService extends WallpaperService {
 
 	@Override
 	public Engine onCreateEngine() {
@@ -33,7 +33,7 @@ public final class AsteroidsService extends WallpaperService {
 	 */
 	private final class WallpaperEngine extends Engine {
 
-		private AsteroidsRenderer mRenderer;
+		private BotzRenderer mRenderer;
 		private float mTouchX, mTouchY;
 		private WallpaperSurfaceView mWallpaperSurfaceView;
 
@@ -45,7 +45,7 @@ public final class AsteroidsService extends WallpaperService {
 
 			super.onCreate(surfaceHolder);
 			mWallpaperSurfaceView = new WallpaperSurfaceView();
-			mRenderer = new AsteroidsRenderer(AsteroidsService.this);
+			mRenderer = new BotzRenderer(BotzService.this);
 			mWallpaperSurfaceView.setEGLContextClientVersion(2);
 			mWallpaperSurfaceView.setRenderer(mRenderer);
 			mWallpaperSurfaceView
@@ -102,7 +102,7 @@ public final class AsteroidsService extends WallpaperService {
 		 */
 		private final class WallpaperSurfaceView extends GLSurfaceView {
 			public WallpaperSurfaceView() {
-				super(AsteroidsService.this);
+				super(BotzService.this);
 			}
 
 			@Override
